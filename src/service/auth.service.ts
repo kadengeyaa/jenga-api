@@ -1,31 +1,40 @@
-const axios = require("axios");
+import axios from 'axios';
+import moment from 'moment';
+import { EvnConfig } from '../config/env.config.js';
+import { URLConfig } from '../config/url.config.js';
+import { AuthOptions, AuthResponse } from '../interface/auth.interface.js';
+import { LoggerUtil } from '../util/logger.js';
 
-async function getAccessToken() {
-  const url =
-    "https://uat.finserve.africa/authentication/api/v3/authenticate/merchant";
+export abstract class AuthService {
+  static async getAuth(options?: AuthOptions): Promise<AuthResponse> {
+    const merchantCode: string | undefined = options?.merchantCode || EvnConfig.kMerchantCode;
+    const consumerSecret: string | undefined = options?.consumerSecret || EvnConfig.kConsumerSecret;
 
-  const accessToken = (
-    await axios.post(
-      url,
-      {
-        merchantCode: "7020673192",
-        consumerSecret: "o5Yl3REiKL9o150FXIAL68sbjgl9n9",
-      },
-      {
-        headers: {
-          "Api-Key":
-            "jRKyFVSR6TruPPIkGSOeeH8iuRZO2pBVl61uO3cp21CnJgZuUYfyYkndYU6TCsdVAlxbxrtwZrwfqSST21dytw==",
-          "Content-Type": "application/json",
+    if (!merchantCode) throw new Error('Jenga! Please provide the merchant code');
+
+    if (!consumerSecret) throw new Error('Jenga! Please provide the consumer secret');
+
+    const response: AuthResponse = (
+      await axios({
+        method: 'post',
+        url: URLConfig.kAuthToken,
+        data: {
+          merchantCode,
+          consumerSecret,
         },
-      }
-    )
-  ).data.accessToken;
+      })
+    ).data;
 
-  console.log("accessToken:", accessToken);
+    LoggerUtil.logger.log('jenga-getAuth %o', response);
 
-  return accessToken;
+    const { expiresIn: expiresInText, issuedAt: issuedAtText } = response;
+
+    return {
+      ...response,
+      ...{
+        expiresIn: moment.utc(expiresInText).toDate(),
+        issuedAt: moment.utc(issuedAtText).toDate(),
+      },
+    };
+  }
 }
-
-module.exports = {
-  getAccessToken,
-};

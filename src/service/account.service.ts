@@ -1,162 +1,237 @@
-const axios = require("axios");
-const auth = require("./auth");
-const sign = require("./sign");
+import { SignOptions, SignService } from './sign.service.js';
+import { AuthService } from './auth.service.js';
+import axios from 'axios';
+import { URLConfig } from '../config/url.config.js';
+import { LoggerUtil } from '../util/logger.js';
+import moment from 'moment';
+import {
+  AccountBalanceResponse,
+  AccountFullStatementResponse,
+  AccountInquiryResponse,
+  AccountMiniStatementResponse,
+  AccountOpeningAndClosingBalanceResponse,
+} from '../interface/account.interface.js';
+import { AuthOptions } from '../interface/auth.interface.js';
 
-async function getBalance(countryCode, accountId) {
-  const url =
-    "https://uat.finserve.africa/v3-apis/account-api/v3.0/accounts/balances";
+export abstract class AccountService {
+  static async getBalance(
+    data: { countryCode: CountryCode; accountNumber: string },
+    options?: {
+      authOptions?: AuthOptions;
+      signOptions?: SignOptions;
+    },
+  ): Promise<AccountBalanceResponse> {
+    const { countryCode, accountNumber } = data;
 
-  const accessToken = await auth.getAccessToken();
+    const signature = SignService.getSignature(`${countryCode}${accountNumber}`, options?.signOptions);
 
-  const data = `${countryCode}${accountId}`;
+    const { accessToken } = await AuthService.getAuth(options?.authOptions);
 
-  const signature = sign.getSignature(data);
-
-  const balance = (
-    await axios.get(`${url}/${countryCode}/${accountId}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        signature: signature,
-        "Content-Type": "application/json",
-      },
-    })
-  ).data;
-
-  console.log("balance:", balance.data);
-
-  return balance;
-}
-
-async function getMiniStatement(countryCode, accountNumber) {
-  const url =
-    "https://uat.finserve.africa/v3-apis/account-api/v3.0/accounts/miniStatement";
-
-  const accessToken = await auth.getAccessToken();
-
-  const data = `${countryCode}${accountNumber}`;
-
-  const signature = sign.getSignature(data);
-
-  const miniStatement = (
-    await axios.get(`${url}/${countryCode}/${accountNumber}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        signature: signature,
-        "Content-Type": "application/json",
-      },
-    })
-  ).data;
-
-  console.log("miniStatement:", miniStatement.data);
-
-  return miniStatement;
-}
-
-async function getFullStatement(
-  countryCode,
-  accountNumber,
-  fromDate,
-  toDate,
-  limit
-) {
-  const url =
-    "https://uat.finserve.africa/v3-apis/account-api/v3.0/accounts/fullStatement";
-
-  const accessToken = await auth.getAccessToken();
-
-  const data = `${countryCode}${accountNumber}${toDate}`;
-
-  const signature = sign.getSignature(data);
-
-  const fullStatement = (
-    await axios.post(
-      url,
-      {
-        countryCode,
-        accountNumber,
-        fromDate,
-        toDate,
-        limit,
-      },
-      {
+    const response: AccountBalanceResponse = (
+      await axios({
+        method: 'get',
+        url: `${URLConfig.kAccountBalance}/${countryCode}/${accountNumber}`,
         headers: {
           Authorization: `Bearer ${accessToken}`,
           signature: signature,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-      }
-    )
-  ).data;
+      })
+    ).data;
 
-  console.log("fullStatement:", fullStatement.data);
+    LoggerUtil.logger.log('jenga-getBalance %o', response);
 
-  return fullStatement;
-}
+    return response;
+  }
 
-async function getOpeningAndClosingBalance(countryCode, accountId, date) {
-  const url =
-    "https://uat.finserve.africa/v3-apis/account-api/v3.0/accounts/accountBalance/query";
+  static async getMiniStatement(
+    data: { countryCode: CountryCode; accountNumber: string },
+    options?: {
+      authOptions?: AuthOptions;
+      signOptions?: SignOptions;
+    },
+  ): Promise<AccountMiniStatementResponse> {
+    const { countryCode, accountNumber } = data;
 
-  const accessToken = await auth.getAccessToken();
+    const signature = SignService.getSignature(`${countryCode}${accountNumber}`, options?.signOptions);
 
-  const data = `${countryCode}${accountId}${date}`;
+    const { accessToken } = await AuthService.getAuth(options?.authOptions);
 
-  const signature = sign.getSignature(data);
-
-  const openingAndClosingBalance = (
-    await axios.post(
-      url,
-      {
-        countryCode,
-        accountId,
-        date,
-      },
-      {
+    const response: AccountMiniStatementResponse = (
+      await axios({
+        method: 'get',
+        url: `${URLConfig.kAccountMiniStatement}/${countryCode}/${accountNumber}`,
         headers: {
           Authorization: `Bearer ${accessToken}`,
           signature: signature,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-      }
-    )
-  ).data;
+      })
+    ).data;
 
-  console.log("openingAndClosingBalance:", openingAndClosingBalance.data);
+    LoggerUtil.logger.log('jenga-getMiniStatement %o', response);
 
-  return openingAndClosingBalance;
-}
+    const {
+      data: { transactions },
+    } = response;
 
-async function getInquiry(countryCode, accountNumber) {
-  const url =
-    "https://uat.finserve.africa/v3-apis/account-api/v3.0/accounts/search";
+    return {
+      ...response,
+      ...{
+        data: {
+          ...response.data,
+          ...{
+            transactions: transactions.map((transaction) => {
+              const { date, amount } = transaction;
 
-  const accessToken = await auth.getAccessToken();
-
-  const data = `${countryCode}${accountNumber}`;
-
-  const signature = sign.getSignature(data);
-
-  const inquiry = (
-    await axios.get(`${url}/${countryCode}/${accountNumber}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        signature: signature,
-        "Content-Type": "application/json",
+              return { ...transaction, ...{ date: moment.utc(date).toDate(), amount: parseFloat(amount.toString()) } };
+            }),
+          },
+        },
       },
-    })
-  ).data;
+    };
+  }
 
-  console.log("inquiry:", inquiry.data);
+  static async getFullStatement(
+    data: { countryCode: CountryCode; accountNumber: string; fromDate: Date; toDate: Date; limit: number },
+    options?: {
+      authOptions?: AuthOptions;
+      signOptions?: SignOptions;
+    },
+  ): Promise<AccountFullStatementResponse> {
+    const { countryCode, accountNumber, fromDate: fromDateToFormat, toDate: toDateToFormat, limit } = data;
 
-  return inquiry;
+    const fromDate = moment.utc(fromDateToFormat).format('YYYY-MM-DD');
+    const toDate = moment.utc(toDateToFormat).format('YYYY-MM-DD');
+
+    const signature = SignService.getSignature(`${countryCode}${accountNumber}${toDate}`, options?.signOptions);
+
+    const { accessToken } = await AuthService.getAuth(options?.authOptions);
+
+    const response: AccountFullStatementResponse = (
+      await axios({
+        method: 'post',
+        url: `${URLConfig.kAccountFullStatement}/${countryCode}/${accountNumber}`,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          signature: signature,
+          'Content-Type': 'application/json',
+        },
+        data: {
+          countryCode,
+          accountNumber,
+          fromDate,
+          toDate,
+          limit,
+        },
+      })
+    ).data;
+
+    LoggerUtil.logger.log('jenga-getFullStatement %o', response);
+
+    const {
+      data: { transactions },
+    } = response;
+
+    return {
+      ...response,
+      ...{
+        data: {
+          ...response.data,
+          ...{
+            transactions: transactions.map((transaction) => {
+              const { date, amount } = transaction;
+
+              return { ...transaction, ...{ date: moment.utc(date).toDate(), amount: parseFloat(amount.toString()) } };
+            }),
+          },
+        },
+      },
+    };
+  }
+
+  static async getOpeningAndClosingBalance(
+    data: { countryCode: CountryCode; accountNumber: string; date: Date },
+    options?: {
+      authOptions?: AuthOptions;
+      signOptions?: SignOptions;
+    },
+  ): Promise<AccountOpeningAndClosingBalanceResponse> {
+    const { countryCode, accountNumber: accountId, date: dateToFormat } = data;
+
+    const date = moment.utc(dateToFormat).format('YYYY-MM-DD');
+
+    const signature = SignService.getSignature(`${countryCode}${accountId}${date}`, options?.signOptions);
+
+    const { accessToken } = await AuthService.getAuth(options?.authOptions);
+
+    const response: AccountOpeningAndClosingBalanceResponse = (
+      await axios({
+        method: 'post',
+        url: URLConfig.kAccountOpeningAndClosingBalance,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          signature: signature,
+          'Content-Type': 'application/json',
+        },
+        data: {
+          countryCode,
+          accountId,
+          date,
+        },
+      })
+    ).data;
+
+    LoggerUtil.logger.log('jenga-getOpeningAndClosingBalance %o', response);
+
+    const {
+      data: { transactions },
+    } = response;
+
+    return {
+      ...response,
+      ...{
+        data: {
+          ...response.data,
+          ...{
+            transactions: transactions.map((transaction) => {
+              const { date, amount } = transaction;
+
+              return { ...transaction, ...{ date: moment.utc(date).toDate(), amount: parseFloat(amount.toString()) } };
+            }),
+          },
+        },
+      },
+    };
+  }
+
+  static async getInquiry(
+    data: { countryCode: CountryCode; accountNumber: string },
+    options?: {
+      authOptions?: AuthOptions;
+      signOptions?: SignOptions;
+    },
+  ): Promise<AccountInquiryResponse> {
+    const { countryCode, accountNumber } = data;
+
+    const signature = SignService.getSignature(`${countryCode}${accountNumber}`, options?.signOptions);
+
+    const { accessToken } = await AuthService.getAuth(options?.authOptions);
+
+    const response: AccountInquiryResponse = (
+      await axios({
+        method: 'get',
+        url: `${URLConfig.kAccountInquiry}/${countryCode}/${accountNumber}`,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          signature: signature,
+          'Content-Type': 'application/json',
+        },
+      })
+    ).data;
+
+    LoggerUtil.logger.log('jenga-getBalance %o', response);
+
+    return response;
+  }
 }
-
-getInquiry("KE", "1450160649886");
-
-module.exports = {
-  getBalance,
-  getMiniStatement,
-  getFullStatement,
-  getOpeningAndClosingBalance,
-  getInquiry,
-};
