@@ -24,7 +24,7 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "typeRoots": ["./node_modules/@types", "src/types"],
-    "types": ["reflect-metadata"],
+    "types": ["reflect-metadata", "node"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "sourceMap": true,
