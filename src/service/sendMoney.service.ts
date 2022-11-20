@@ -5,7 +5,8 @@ import { URLConfig } from '../config/url.config.js';
 import { LoggerUtil } from '../util/logger.js';
 import { AuthOptions } from '../interface/auth.interface.js';
 import {
-  SendMoneyPesaLinkResponse,
+  SendMoneyPesaLinkToBankAccountResponse,
+  SendMoneyPesaLinkToMobileNumberResponse,
   SendMoneyRTGSResponse,
   SendMoneySWIFTResponse,
   SendMoneyToMobileWalletResponse,
@@ -282,7 +283,7 @@ export abstract class SendMoneyService {
     return response;
   }
 
-  static async sendMoneyPesaLink(
+  static async sendMoneyPesaLinkToBankAccount(
     data: {
       source: {
         countryCode: CountryCode;
@@ -309,7 +310,7 @@ export abstract class SendMoneyService {
       authOptions?: AuthOptions;
       signOptions?: SignOptions;
     },
-  ): Promise<SendMoneyPesaLinkResponse> {
+  ): Promise<SendMoneyPesaLinkToBankAccountResponse> {
     const {
       source: { accountNumber },
       destination: { name: destinationName },
@@ -325,10 +326,74 @@ export abstract class SendMoneyService {
 
     const { accessToken } = await AuthService.getAuth(options?.authOptions);
 
-    const response: SendMoneyPesaLinkResponse = (
+    const response: SendMoneyPesaLinkToBankAccountResponse = (
       await axios({
         method: 'post',
-        url: URLConfig.kSendMoneyPesalinkToAccount,
+        url: URLConfig.kSendMoneyPesalinkToBankAccount,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          signature: signature,
+          'Content-Type': 'application/json',
+        },
+        data: {
+          ...data,
+          ...{ transfer: { ...data.transfer, ...{ date } } },
+        },
+      })
+    ).data;
+
+    LoggerUtil.logger.log('jenga-sendMoneyPesaLink %o', response);
+
+    return response;
+  }
+
+  static async sendMoneyPesaLinkToMobileNumber(
+    data: {
+      source: {
+        countryCode: CountryCode;
+        name: string;
+        accountNumber: string;
+      };
+      destination: {
+        type: 'bank';
+        countryCode: CountryCode;
+        name: string;
+        bankCode: string;
+        accountNumber: string;
+      };
+      transfer: {
+        type: 'PesaLink';
+        amount: number;
+        currencyCode: CurrencyCode;
+        reference: string;
+        date: Date;
+        description: string;
+      };
+    },
+    options?: {
+      authOptions?: AuthOptions;
+      signOptions?: SignOptions;
+    },
+  ): Promise<SendMoneyPesaLinkToMobileNumberResponse> {
+    const {
+      source: { accountNumber },
+      destination: { name: destinationName },
+      transfer: { amount, reference, date: dateToFormat, currencyCode },
+    } = data;
+
+    const date = moment.utc(dateToFormat).format('YYYY-MM-DD');
+
+    const signature = SignService.getSignature(
+      `${amount}${currencyCode}${reference}${destinationName}${accountNumber}`,
+      options?.signOptions,
+    );
+
+    const { accessToken } = await AuthService.getAuth(options?.authOptions);
+
+    const response: SendMoneyPesaLinkToMobileNumberResponse = (
+      await axios({
+        method: 'post',
+        url: URLConfig.kSendMoneyPesalinkToMobileNumber,
         headers: {
           Authorization: `Bearer ${accessToken}`,
           signature: signature,

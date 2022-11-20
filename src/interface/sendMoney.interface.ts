@@ -27,7 +27,14 @@ export interface SendMoneySWIFTResponse {
   data: { transactionId: string; status: 'SUCCESS' };
 }
 
-export interface SendMoneyPesaLinkResponse {
+export interface SendMoneyPesaLinkToBankAccountResponse {
+  status: boolean;
+  code: number;
+  message: ResponseMessage;
+  data: { description: string; transactionId: string; status: 'SUCCESS' };
+}
+
+export interface SendMoneyPesaLinkToMobileNumberResponse {
   status: boolean;
   code: number;
   message: ResponseMessage;
