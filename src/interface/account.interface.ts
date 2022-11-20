@@ -1,4 +1,4 @@
-
+import { AccountStatus, CurrencyCode, CustomerType, ResponseMessage } from './general.interface.js';
 
 export interface AccountBalance {
   amount: number;
