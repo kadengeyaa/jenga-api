@@ -11,7 +11,7 @@ export interface SendMoneyToMobileWalletResponse {
   status: boolean;
   code: -1;
   message: string;
-  transactionId: '7878787878787879';
+  transactionId: string;
 }
 
 export interface SendMoneyRTGSResponse {
@@ -25,4 +25,11 @@ export interface SendMoneySWIFTResponse {
   code: number;
   message: ResponseMessage;
   data: { transactionId: string; status: 'SUCCESS' };
+}
+
+export interface SendMoneyPesaLinkResponse {
+  status: boolean;
+  code: number;
+  message: ResponseMessage;
+  data: { description: string; transactionId: string; status: 'SUCCESS' };
 }
