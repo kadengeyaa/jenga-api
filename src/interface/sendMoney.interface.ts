@@ -13,3 +13,10 @@ export interface SendMoneyToMobileWalletResponse {
   message: string;
   transactionId: '7878787878787879';
 }
+
+export interface SendMoneyRTGSResponse {
+  status: boolean;
+  code: number;
+  message: ResponseMessage;
+  data: { transactionId: string; status: 'SUCCESS' };
+}
