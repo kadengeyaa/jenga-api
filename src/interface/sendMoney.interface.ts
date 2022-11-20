@@ -20,3 +20,9 @@ export interface SendMoneyRTGSResponse {
   message: ResponseMessage;
   data: { transactionId: string; status: 'SUCCESS' };
 }
+export interface SendMoneySWIFTResponse {
+  status: boolean;
+  code: number;
+  message: ResponseMessage;
+  data: { transactionId: string; status: 'SUCCESS' };
+}

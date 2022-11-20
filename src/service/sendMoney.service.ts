@@ -6,6 +6,7 @@ import { LoggerUtil } from '../util/logger.js';
 import { AuthOptions } from '../interface/auth.interface.js';
 import {
   SendMoneyRTGSResponse,
+  SendMoneySWIFTResponse,
   SendMoneyToMobileWalletResponse,
   SendMoneyWithinEquityBankResponse,
 } from '../interface/sendMoney.interface.js';
@@ -208,6 +209,74 @@ export abstract class SendMoneyService {
     ).data;
 
     LoggerUtil.logger.log('jenga-sendMoneyRTGS %o', response);
+
+    return response;
+  }
+
+  static async sendMoneySWIFT(
+    data: {
+      source: {
+        countryCode: CountryCode;
+        name: string;
+        accountNumber: string;
+        sourceCurrency: CurrencyCode;
+      };
+      destination: {
+        type: 'bank';
+        countryCode: CountryCode;
+        name: string;
+        bankBic: string;
+        accountNumber: string;
+        addressline1: string;
+        currency: CurrencyCode;
+      };
+      transfer: {
+        type: 'SWIFT';
+        amount: number;
+        currencyCode: CurrencyCode;
+        reference: string;
+        date: Date;
+        description: string;
+        chargeOption: 'SELF';
+      };
+    },
+    options?: {
+      authOptions?: AuthOptions;
+      signOptions?: SignOptions;
+    },
+  ): Promise<SendMoneySWIFTResponse> {
+    const {
+      source: { accountNumber },
+      destination: { accountNumber: destinationAccountNumber },
+      transfer: { amount, reference, date: dateToFormat },
+    } = data;
+
+    const date = moment.utc(dateToFormat).format('YYYY-MM-DD');
+
+    const signature = SignService.getSignature(
+      `${reference}${date}${accountNumber}${destinationAccountNumber}${amount}`,
+      options?.signOptions,
+    );
+
+    const { accessToken } = await AuthService.getAuth(options?.authOptions);
+
+    const response: SendMoneySWIFTResponse = (
+      await axios({
+        method: 'post',
+        url: URLConfig.kSendMoneySWIFT,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          signature: signature,
+          'Content-Type': 'application/json',
+        },
+        data: {
+          ...data,
+          ...{ transfer: { ...data.transfer, ...{ date } } },
+        },
+      })
+    ).data;
+
+    LoggerUtil.logger.log('jenga-sendMoneySWIFT %o', response);
 
     return response;
   }
