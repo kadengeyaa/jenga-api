@@ -20,8 +20,8 @@ export abstract class URLConfig {
   static kSendMoneyRTGS = `${this.kBaseURL}/v3-apis/transaction-api/v3.0/remittance/rtgs`;
   static kSendMoneySWIFT = `${this.kBaseURL}/v3-apis/transaction-api/v3.0/remittance/swift`;
   static kSendMoneyEFT = `${this.kBaseURL}`; // Not provided
-  static kSendMoneyPesalinkToAccount = `${this.kBaseURL}/v3-apis/transaction-api/v3.0/remittance/pesalinkacc`;
-  static kSendMoneyPesalinkToMobile = `${this.kBaseURL}/v3-apis/transaction-api/v3.0/remittance/pesalinkMobile`;
+  static kSendMoneyPesalinkToBankAccount = `${this.kBaseURL}/v3-apis/transaction-api/v3.0/remittance/pesalinkacc`;
+  static kSendMoneyPesalinkToMobileNumber = `${this.kBaseURL}/v3-apis/transaction-api/v3.0/remittance/pesalinkMobile`;
 
   // Send money queries
   static kSendMoneyAccountInquiry = `${this.kBaseURL}`; // Not provided

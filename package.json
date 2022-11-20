@@ -1,24 +1,45 @@
 {
-  "name": "jitenge-plus-api",
-  "version": "1.0.0",
-  "description": "Server for Jitenge+",
+  "name": "jenga-api",
+  "version": "1.0.1",
+  "description": "APIs to integrate Equity Jenga Payments",
   "type": "module",
-  "exports": "./src/app.js",
+  "exports": "./src/index.js",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "engines": {
     "node": ">=14.16"
   },
-  "author": "kadengeyaa <kadengeyaa@gmail.com>",
+  "author": "kadengeyaa <github.com/kadengeyaa>",
   "license": "MIT",
-  "private": true,
+  "private": false,
   "scripts": {
     "build": "tsc",
     "start": "nodemon",
-    "test": "jest",
-    "lint": "eslint --ignore-path .eslintignore --ext .ts src/",
-    "lint:fix": "yarn lint --fix",
-    "prettier:fix": "prettier --write '**/*.ts'",
-    "prepare": "husky install"
+    "lint": "eslint --ignore-path .eslintignore --ext .ts src/ --fix",
+    "format": "prettier --write '**/*.ts'",
+    "prepare": "husky install && npm run build",
+    "prepublishOnly": "npm run lint",
+    "preversion": "npm run lint",
+    "version": "npm run format && git add -A src",
+    "postversion": "git push && git push --tags"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kadengeyaa/jenga-api.git"
+  },
+  "keywords": [
+    "Jenga",
+    "Equity Bank",
+    "Payments",
+    "Payment gateway"
+  ],
+  "bugs": {
+    "url": "https://github.com/kadengeyaa/jenga-api/issues"
+  },
+  "homepage": "https://github.com/kadengeyaa/jenga-api#readme",
+  "files": [
+    "build/**/*"
+  ],
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"

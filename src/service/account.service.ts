@@ -12,6 +12,7 @@ import {
   AccountOpeningAndClosingBalanceResponse,
 } from '../interface/account.interface.js';
 import { AuthOptions } from '../interface/auth.interface.js';
+import { CountryCode } from '../interface/general.interface.js';
 
 export abstract class AccountService {
   static async getBalance(
