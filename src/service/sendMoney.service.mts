@@ -1,9 +1,9 @@
-import { SignOptions, SignService } from './sign.service.js';
-import { AuthService } from './auth.service.js';
+import { SignOptions, SignService } from './sign.service.mjs';
+import { AuthService } from './auth.service.mjs';
 import axios from 'axios';
-import { URLConfig } from '../config/url.config.js';
-import { LoggerUtil } from '../util/logger.js';
-import { AuthOptions } from '../interface/auth.interface.js';
+import { URLConfig } from '../config/url.config.mjs';
+import { LoggerUtil } from '../util/logger.mjs';
+import { AuthOptions } from '../interface/auth.interface.mjs';
 import {
   SendMoneyPesaLinkToBankAccountResponse,
   SendMoneyPesaLinkToMobileNumberResponse,
@@ -11,8 +11,8 @@ import {
   SendMoneySWIFTResponse,
   SendMoneyToMobileWalletResponse,
   SendMoneyWithinEquityBankResponse,
-} from '../interface/sendMoney.interface.js';
-import { CountryCode, CurrencyCode } from '../interface/general.interface.js';
+} from '../interface/sendMoney.interface.mjs';
+import { CountryCode, CurrencyCode } from '../interface/general.interface.mjs';
 import moment from 'moment';
 
 export abstract class SendMoneyService {

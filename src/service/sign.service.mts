@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs';
 import { sign, verify } from 'crypto';
-import { EvnConfig } from '../config/env.config.js';
+import { EvnConfig } from '../config/env.config.mjs';
 import { resolve } from 'path';
-import { LoggerUtil } from '../util/logger.js';
+import { LoggerUtil } from '../util/logger.mjs';
 
 export interface SignOptions {
   pathToPrivateKey?: string;

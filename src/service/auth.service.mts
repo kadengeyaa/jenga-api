@@ -1,9 +1,9 @@
 import axios from 'axios';
 import moment from 'moment';
-import { EvnConfig } from '../config/env.config.js';
-import { URLConfig } from '../config/url.config.js';
-import { AuthOptions, AuthResponse } from '../interface/auth.interface.js';
-import { LoggerUtil } from '../util/logger.js';
+import { EvnConfig } from '../config/env.config.mjs';
+import { URLConfig } from '../config/url.config.mjs';
+import { AuthOptions, AuthResponse } from '../interface/auth.interface.mjs';
+import { LoggerUtil } from '../util/logger.mjs';
 
 export abstract class AuthService {
   static async getAuth(options?: AuthOptions): Promise<AuthResponse> {

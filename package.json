@@ -2,10 +2,9 @@
   "name": "jenga-api",
   "version": "1.0.2",
   "description": "APIs to integrate Equity Jenga Payments",
-  "type": "module",
-  "exports": "./src/index.js",
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
+  "exports": "./lib/index.mjs",
+  "main": "lib/index.mjs",
+  "types": "lib/index.d.mts",
   "engines": {
     "node": ">=14.16"
   },
@@ -15,8 +14,8 @@
   "scripts": {
     "build": "tsc",
     "start": "nodemon",
-    "lint": "eslint --ignore-path .eslintignore --ext .ts src/ --fix",
-    "format": "prettier --write '**/*.ts'",
+    "lint": "eslint --ignore-path .eslintignore --ext .mts src/ --fix",
+    "format": "prettier --write '**/*.mts'",
     "prepare": "husky install && npm run build",
     "prepublishOnly": "npm run lint",
     "preversion": "npm run lint",
