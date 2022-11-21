@@ -1,4 +1,4 @@
-import { EvnConfig } from './env.config.js';
+import { EvnConfig } from './env.config.mjs';
 
 export abstract class URLConfig {
   static kBaseURL =

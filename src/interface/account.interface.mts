@@ -1,4 +1,4 @@
-import { AccountStatus, CurrencyCode, CustomerType, ResponseMessage } from './general.interface.js';
+import { AccountStatus, CurrencyCode, CustomerType, ResponseMessage } from './general.interface.mjs';
 
 export interface AccountBalance {
   amount: number;

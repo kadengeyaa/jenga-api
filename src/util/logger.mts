@@ -1,5 +1,5 @@
 import winston, { Logger } from 'winston';
-import { EvnConfig } from '../config/env.config.js';
+import { EvnConfig } from '../config/env.config.mjs';
 
 export abstract class LoggerUtil {
   static logger: Logger = winston.createLogger({

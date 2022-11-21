@@ -1,4 +1,4 @@
-import { ResponseMessage } from './general.interface.js';
+import { ResponseMessage } from './general.interface.mjs';
 
 export interface SendMoneyWithinEquityBankResponse {
   status: boolean;

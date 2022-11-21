@@ -1,8 +1,8 @@
-import { SignOptions, SignService } from './sign.service.js';
-import { AuthService } from './auth.service.js';
+import { SignOptions, SignService } from './sign.service.mjs';
+import { AuthService } from './auth.service.mjs';
 import axios from 'axios';
-import { URLConfig } from '../config/url.config.js';
-import { LoggerUtil } from '../util/logger.js';
+import { URLConfig } from '../config/url.config.mjs';
+import { LoggerUtil } from '../util/logger.mjs';
 import moment from 'moment';
 import {
   AccountBalanceResponse,
@@ -10,9 +10,9 @@ import {
   AccountInquiryResponse,
   AccountMiniStatementResponse,
   AccountOpeningAndClosingBalanceResponse,
-} from '../interface/account.interface.js';
-import { AuthOptions } from '../interface/auth.interface.js';
-import { CountryCode } from '../interface/general.interface.js';
+} from '../interface/account.interface.mjs';
+import { AuthOptions } from '../interface/auth.interface.mjs';
+import { CountryCode } from '../interface/general.interface.mjs';
 
 export abstract class AccountService {
   static async getBalance(
