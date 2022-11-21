@@ -2,9 +2,10 @@
   "name": "jenga-api",
   "version": "1.0.4",
   "description": "APIs to integrate Equity Jenga Payments",
-  "exports": "./lib/index.mjs",
-  "main": "lib/index.mjs",
-  "types": "lib/index.d.mts",
+  "type": "module",
+  "exports": "./lib/index.js",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "engines": {
     "node": ">=14.16"
   },
